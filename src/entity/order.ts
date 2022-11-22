@@ -2,7 +2,7 @@ import OrderItem from "./orderitem";
 
 export default class Order {
   private _id: string;
-  private _customerId: String;
+  private _customerId: string;
   private _items: OrderItem[];
 
   constructor(id: string, customerId: string, items: OrderItem[]) {
