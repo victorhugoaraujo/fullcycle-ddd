@@ -18,7 +18,7 @@ describe("Order repository test", () => {
   beforeEach(async () => {
     sequelize = new Sequelize({
       dialect: "sqlite",
-      storage: ":memory",
+      storage: ":memory:",
       logging: false,
       sync: { force: true }
     });
@@ -78,7 +78,97 @@ describe("Order repository test", () => {
         },
       ],
     })
-  })
+  });
+  it("should update an order", async () => {
+    const customerRepository = new CustomerRepository();
+    const customer = new Customer("c1", "Customer 1");
 
+    const address = new Address("Street 1", 1, "zipcode 1", "City 1");
+    customer.changeAddress(address);
 
-})
+    await customerRepository.create(customer);
+
+    const productRepository = new ProductRepository();
+    const product = new Product("p1", "Product 1", 100);
+    await productRepository.create(product);
+
+    const orderItem = new OrderItem(
+      "1",
+      product.name,
+      product.price,
+      product.id,
+      2
+    );
+
+    let order = new Order("123", "c1", [orderItem]);
+
+    const orderRepository = new OrderRepository();
+    await orderRepository.create(order);
+
+    let orderModel = await OrderModel.findOne({
+      where: { id: order.id },
+      include: ["items"],
+    });
+    expect(orderModel.toJSON()).toStrictEqual({
+      id: "123",
+      customer_id: "c1",
+      total: order.total(),
+      items: [
+        {
+          id: orderItem.id,
+          name: orderItem.name,
+          price: orderItem.price,
+          product_id: orderItem.productId,
+          quantity: orderItem.quantity,
+          order_id: "123",
+        },
+      ],
+    });
+
+    const product2 = new Product("p2", "Product2", 200);
+    await productRepository.create(product2);
+
+    const orderItem2 = new OrderItem(
+      "2",
+      product.name,
+      product.price,
+      product.id,
+      4
+    );
+    order = new Order("123", "c1", [orderItem, orderItem2]);
+    await orderRepository.update(order);
+
+    orderModel = await OrderModel.findOne(
+      {
+        where: {
+          id: order.id,
+        },
+        include: ["items"]
+      }
+    )
+    expect(orderModel.toJSON()).toStrictEqual({
+      id: "123",
+      customer_id: "c1",
+      total: order.total(),
+      items: [
+        {
+          id: orderItem.id,
+          name: orderItem.name,
+          price: orderItem.price,
+          product_id: orderItem.productId,
+          quantity: orderItem.quantity,
+          order_id: "123",
+        },
+        {
+          id: orderItem2.id,
+          name: orderItem2.name,
+          price: orderItem2.price,
+          product_id: orderItem2.productId,
+          quantity: orderItem2.quantity,
+          order_id: "123",
+        },
+      ],
+    })
+  });
+
+});

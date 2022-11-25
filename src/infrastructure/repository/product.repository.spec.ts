@@ -37,7 +37,7 @@ describe("Product repository test", () => {
     });
   });
 
-  it("should update a produc", async () => {
+  it("should update a product", async () => {
     const productRepository = new ProductRepository();
     const product = new Product("1", "Product 1", 100);
 
