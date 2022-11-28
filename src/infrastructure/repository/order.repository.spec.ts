@@ -47,9 +47,9 @@ describe("Order repository test", () => {
 
     const orderItem = new OrderItem(
       "1",
+      product.id,
       product.name,
       product.price,
-      product.id,
       2
     );
     const order = new Order("123", "123", [orderItem]);
@@ -94,9 +94,9 @@ describe("Order repository test", () => {
 
     const orderItem = new OrderItem(
       "1",
+      product.id,
       product.name,
       product.price,
-      product.id,
       2
     );
 
@@ -130,9 +130,9 @@ describe("Order repository test", () => {
 
     const orderItem2 = new OrderItem(
       "2",
+      product.id,
       product.name,
       product.price,
-      product.id,
       4
     );
     order = new Order("123", "c1", [orderItem, orderItem2]);
@@ -171,4 +171,56 @@ describe("Order repository test", () => {
     })
   });
 
+  it("should find a order", async () => {
+    const orderRepository = new OrderRepository();
+
+    const customerRepository = new CustomerRepository();
+    const customer = new Customer("c1", "Customer 1");
+
+    const address = new Address("Street 1", 1, "zipcode 1", "City 1");
+
+    customer.changeAddress(address);
+    await customerRepository.create(customer);
+
+    const productRepository = new ProductRepository();
+    const product = new Product("p1", "Product 1", 10);
+
+    await productRepository.create(product);
+
+    const orderItem = new OrderItem(
+      "oi1",
+      product.id,
+      product.name,
+      product.price,
+      3
+    );
+    const order = new Order("o1", "c1", [orderItem]);
+
+    await orderRepository.create(order);
+
+    const orderModel = await OrderModel.findOne({
+      where: { id: order.id },
+      include: ["items"],
+    });
+
+    expect(orderModel.toJSON()).toStrictEqual({
+      id: order.id,
+      customer_id: order.customerId,
+      total: order.total(),
+      items: [
+        {
+          id: orderItem.id,
+          order_id: order.id,
+          product_id: orderItem.productId,
+          name: orderItem.name,
+          price: orderItem.price,
+          quantity: orderItem.quantity
+        }
+      ]
+    })
+
+    const foundOrder = await orderRepository.find(order.id)
+
+    expect(order).toStrictEqual(foundOrder)
+  })
 });

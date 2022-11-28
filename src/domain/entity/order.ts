@@ -4,12 +4,14 @@ export default class Order {
   private _id: string;
   private _customerId: string;
   private _items: OrderItem[];
+  private _total: number;
 
   constructor(id: string, customerId: string, items: OrderItem[]) {
     this._id = id;
     this._customerId = customerId;
     this._items = items;
-    this.validate();
+    this._total = this.total(),
+      this.validate();
   }
 
   get id(): string {
@@ -41,6 +43,6 @@ export default class Order {
   }
 
   total(): number {
-    return this._items.reduce((acc, item) => acc + item.price, 0)
+    return this._items.reduce((acc, item) => acc + item.price * item.quantity, 0)
   }
 }
