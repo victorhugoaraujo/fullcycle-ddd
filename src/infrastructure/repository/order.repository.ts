@@ -47,10 +47,16 @@ export default class OrderRepository implements OrderRepositoryInterface {
   };
 
   async find(id: string): Promise<Order> {
-    const orderModel = await OrderModel.findOne({
-      where: { id },
-      include: [{ model: OrderItemModel }],
-    });
+    let orderModel;
+    try {
+      orderModel = await OrderModel.findOne({
+        where: { id },
+        include: [{ model: OrderItemModel }],
+      });
+    } catch (error) {
+      throw new Error("Order not found");
+    }
+
     return new Order(
       orderModel.id,
       orderModel.customer_id,
@@ -65,6 +71,23 @@ export default class OrderRepository implements OrderRepositoryInterface {
   };
 
   async findAll(): Promise<Order[]> {
-    throw new Error("not implemented")
+    const orderModels = await OrderModel.findAll({
+      include: [{ model: OrderItemModel }],
+    });
+    const orders = orderModels.map(orderModel => {
+      let order = new Order(
+        orderModel.id,
+        orderModel.customer_id,
+        orderModel.items.map(item => new OrderItem(
+          item.id,
+          item.product_id,
+          item.name,
+          item.price,
+          item.quantity
+        ))
+      )
+      return order;
+    });
+    return orders;
   };
 }
