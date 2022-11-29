@@ -60,5 +60,5 @@ describe("Domain event test", () => {
     eventDispatcher.notify(productCreatedEvent);
 
     expect(spyEventHandler).toHaveBeenCalled();
-  })
+  });
 })

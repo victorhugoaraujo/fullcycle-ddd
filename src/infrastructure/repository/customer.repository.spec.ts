@@ -107,7 +107,6 @@ describe("Customer repository test", () => {
     customer1.addRewardPoints(10);
     customer1.activate();
 
-
     const customer2 = new Customer("c2", "Customer 2");
     const address2 = new Address("Street 2", 1, "zip 2", "City 2")
     customer2.Address = address2;
@@ -122,5 +121,5 @@ describe("Customer repository test", () => {
     expect(foundCustomers).toHaveLength(2);
     expect(foundCustomers).toContainEqual(customer1);
     expect(foundCustomers).toContainEqual(customer2);
-  })
+  });
 })
